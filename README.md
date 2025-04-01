@@ -2,6 +2,7 @@
 
 # EMA高低收通道
 [原始视频](https://www.bilibili.com/video/BV1hF4m1T73E?spm_id_from=333.788.recommend_more_video.4&vd_source=7fc5922397de9362d6f5bfc73e707c59)
+[代码](https://github.com/0xnex/tradingview/blob/main/ema_hlc_channel.py)
 
 - 📈买入规则一：价格从下方穿过移动平均区域，表示趋势可能转向牛市
 - 📉买入规则二：价格保持在移动平均区域内，偶尔突破但不收盘在区域外
