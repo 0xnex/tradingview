@@ -1,0 +1,61 @@
+//@version=5
+indicator("AHR999 DCA",  overlay=false)
+
+// === Inputs ===
+cash_low = input.float(200, "Daily invest ($) when AHR999 < 0.45")
+cash_mid = input.float(50,  "Daily invest ($) when 0.45 ≤ AHR999 < 1.2")
+startDate = input.time(timestamp("2020-01-01"), "Start Date")
+sellThreshold = input.float(4.0, "Sell all when AHR999 > x (default 4)")
+
+// === Indicator calculation ===
+// Bitcoin genesis date
+birth = timestamp("2009-01-03")
+
+// Days since genesis
+days  = (time - birth) / (24 * 60 * 60 * 1000)
+log_model_price = 5.84 * math.log10(days) - 17.01
+// Power regression line
+expVal = days > 1 ? math.pow(10, log_model_price) : na
+
+// 200-day geometric mean (cost basis of DCA)
+geomean = math.exp(ta.sma(math.log(close), 200))
+
+// AHR999 index
+ahr999 = (close / geomean) * (close / expVal)
+
+// === Use yesterday's value (T+1 execution) ===
+sigBuyLow_prev  = (ahr999[1] < 0.45)
+sigBuyMid_prev  = (ahr999[1] >= 0.45 and ahr999[1] < 1.2)
+sigSellAll_prev = (ahr999[1] > sellThreshold)
+
+// === Variables to track portfolio ===
+// Persistent variables (keep values across bars)
+var float total_invest = 0.0     // Current invested cost
+var float total_qty    = 0.0     // Current holding quantity
+
+// New day detection
+isNewDay = ta.change(time("D")) != 0 or barstate.isfirst
+valid = not na(geomean) and not na(expVal)
+
+if isNewDay and time >= startDate and valid
+    if sigBuyLow_prev
+        // Invest $200 -> add BTC qty and cost
+        qty = cash_low / close
+        total_qty    += qty
+        total_invest += cash_low
+    else if sigBuyMid_prev
+        // Invest $50 -> add BTC qty and cost
+        qty = cash_mid / close
+        total_qty    += qty
+        total_invest += cash_mid
+    else if sigSellAll_prev and total_qty > 0
+        // Sell all -> reset holdings and cost
+        total_qty    := 0
+        total_invest := 0
+
+// === Portfolio net value ===
+net_value = total_qty * close
+
+// === Plotting ===
+plot(total_invest, title="Invested Cost", color=color.orange, linewidth=2)
+plot(net_value,   title="Portfolio Value", color=color.blue, linewidth=2)
