@@ -13,7 +13,8 @@
 - 📉卖出策略：利润目标及止损设置，避免止损位太远时进入交易
 
 # ARH999  DCA
-[code]((https://github.com/0xnex/tradingview/blob/main/ahr999.pine))
+[code](https://github.com/0xnex/tradingview/blob/main/ahr999.pine)
+
 This indicator implements the AHR999-based Dollar-Cost Averaging (DCA) investment strategy for Bitcoin.
 * Buy rules (T+1 execution):
   * Invest $200 per day when AHR999 < 0.45 (deep undervaluation).
